@@ -1,6 +1,14 @@
 #!/usr/bin/env perl
+#
+# Andrey Mamaev
+#
+# How use downloader
+# 1. make file with web pages each link in new line 
+# 2. Start download "cat link.txt | ./youtube_download.pl"
+# 3. Videos will download and call by title 
+#
+#
 
-use lib "/home/asda/workspace/wms/mojo/lib";
 use Mojo::UserAgent;
 use Mojo::DOM;
 use Mojo::URL;
