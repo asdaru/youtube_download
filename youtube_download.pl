@@ -16,11 +16,11 @@ use Data::Dumper;
 use v5.10;
 use strict;
 use warnings;
-$ENV{MOJO_MAX_MESSAGE_SIZE} = 1073741824;
+$ENV{MOJO_MAX_MESSAGE_SIZE} = 1024*1024*1042*20; #2G
 
 sub parse_page {
 	my $page          = shift;
-	my $ua            = Mojo::UserAgent->new;
+	my $ua            = Mojo::UserAgent->new(max_redirects => 10);
 	my $res           = $ua->get( $page => { DNT => 1 } )->res;
 	my $dom           = Mojo::DOM->new( $res->body );
 	my @youtubes_http = ();
@@ -49,7 +49,6 @@ sub download {
 			last;
 		}
 	}
-	say "title: $name";
 	my $filename = $name;
 	$filename =~ s/\//_/g;
 	$filename =~ s/\./ /g;
@@ -59,6 +58,10 @@ sub download {
 	$filename =~ s/\:/ /g;
 
 	if ( !-f "./$filename.mp4" ) {
+		say "youtube link: $youtube_http";
+		say "title: $name";
+
+
 
 		#$res = $ua->get( "http://ru.savefrom.net/#url=http://youtube.com/watch?v=$youtube_id&utm_source=youtube.com&utm_medium=short_domains&utm_campaign=www.ssyoutube.com" => { DNT => 1 } )->res;
 		$res = $ua->get( 'http://keepvid.com/?url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' . $youtube_id => { DNT => 1 } )->res;
@@ -71,26 +74,23 @@ sub download {
 		}
 
 		if ( $mp4[1] ) {
-			$res = $ua->get( $mp4[1] )->res;
+			#say "wget \"$mp4[1]\" --output-document=\"$filename.mp4\"";
+			exec "wget \"$mp4[1]\" --output-document=\"$filename.mp4\"";
 		} elsif ( $mp4[0] ) {
-			$res = $ua->get( $mp4[0] )->res;
+			#say "wget \"$mp4[0]\" --output-document=\"$filename.mp4\"";
+			exec "wget \"$mp4[0]\" --output-document=\"$filename.mp4\"";
 		}
 
-		#$res->headers->content_disposition =~ /"(.+)"/;
-		#my $filename = $1;
-
-		say "download: $filename";
-		$res->content->asset->move_to("./$filename.mp4");
 	}
 }
 
 sub main {
 	my @links = @_;
 	foreach my $link (@links) {
-		say "page: $link";
+		#say "page: $link";
 		my @youtubes_http = parse_page($link);
 		foreach (@youtubes_http) {
-			say "youtube link: $_";
+			#say "youtube link: $_";
 			download($_);
 		}
 	}
