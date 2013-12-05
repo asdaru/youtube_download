@@ -52,10 +52,11 @@ sub download {
 	say "title: $name";
 	my $filename = $name;
 	$filename =~ s/\//_/g;
-	$filename =~ s/\./_/g;
+	$filename =~ s/\./ /g;
 	$filename =~ s/\%/_/g;
 	$filename =~ s/\*/_/g;
 	$filename =~ s/\?/_/g;
+	$filename =~ s/\:/ /g;
 
 	if ( !-f "./$filename.mp4" ) {
 
