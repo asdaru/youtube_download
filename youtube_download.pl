@@ -28,6 +28,9 @@ sub parse_page {
 	for my $iframe ( $dom->find("iframe")->each ) {
 		if ( $iframe->{src} =~ /youtube\.com/ ) {
 			push @youtubes_http, $iframe->{src};
+		}elsif ($iframe->{src} =~ /l\.lj-toys\.com/){
+			$iframe->{src} =~/vid=(.+)&mod/;
+			push @youtubes_http, "http://www.youtube.com/embed/$1?wmode=opaque&wmode=opaque"
 		}
 	}
 
@@ -61,26 +64,10 @@ sub download {
 		say "youtube link: $youtube_http";
 		say "title: $name";
 
-
-
-		#$res = $ua->get( "http://ru.savefrom.net/#url=http://youtube.com/watch?v=$youtube_id&utm_source=youtube.com&utm_medium=short_domains&utm_campaign=www.ssyoutube.com" => { DNT => 1 } )->res;
-		$res = $ua->get( 'http://keepvid.com/?url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D' . $youtube_id => { DNT => 1 } )->res;
-
-		$dom = Mojo::DOM->new( $res->body );
-		my @mp4 = ();
-
-		for my $a ( $dom->find("a")->each ) {
-			push @mp4, $a->{href} if $a->text =~ /Download MP4/;
-		}
-
-		if ( $mp4[1] ) {
-			#say "wget \"$mp4[1]\" --output-document=\"$filename.mp4\"";
-			exec "wget \"$mp4[1]\" --output-document=\"$filename.mp4\"";
-		} elsif ( $mp4[0] ) {
-			#say "wget \"$mp4[0]\" --output-document=\"$filename.mp4\"";
-			exec "wget \"$mp4[0]\" --output-document=\"$filename.mp4\"";
-		}
-
+		system('youtube-dl -q --no-progress  --max-quality --no-mtime '.$youtube_id." && mv $youtube_id.mp4 \"$filename.mp4\"" ); 
+		
+	}else{
+		say "Уже загружен $filename.mp4"
 	}
 }
 
